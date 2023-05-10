@@ -35,8 +35,11 @@ const STARTS_WITH_LT = /^\s*</u
  * @returns `true` if the source code is a Vue.js component.
  */
 function isVueFile(code: string, options: ParserOptions): boolean {
-    const filePath = options.filePath || "unknown.js"
-    return path.extname(filePath) === ".vue" || STARTS_WITH_LT.test(code)
+    const { extraFileExtensions = [".vue"], filePath = "unknown.js" } = options
+    return (
+        extraFileExtensions.includes(path.extname(filePath)) ||
+        STARTS_WITH_LT.test(code)
+    )
 }
 
 /**
@@ -194,12 +197,14 @@ function parseAsScript(code: string, options: ParserOptions) {
         ...options,
         ecmaVersion: options.ecmaVersion || DEFAULT_ECMA_VERSION,
         parser: getScriptParser(options.parser, () => {
-            const ext = (
+            let ext =
                 path.extname(options.filePath || "unknown.js").toLowerCase() ||
                 ""
-            )
-                // remove dot
-                .slice(1)
+            if ((options.extraFileExtensions || [".vue"]).includes(ext)) {
+                ext = ".vue"
+            }
+            // remove dot
+            ext = ext.slice(1)
             if (/^[jt]sx$/u.test(ext)) {
                 return [ext, ext.slice(0, -1)]
             }

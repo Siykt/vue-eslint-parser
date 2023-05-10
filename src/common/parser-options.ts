@@ -58,7 +58,9 @@ export function isSFCFile(parserOptions: ParserOptions) {
     if (parserOptions.filePath === "<input>") {
         return true
     }
-    return path.extname(parserOptions.filePath || "unknown.vue") === ".vue"
+    const { extraFileExtensions = [".vue"], filePath = "unknown.js" } =
+        parserOptions
+    return extraFileExtensions.includes(path.extname(filePath))
 }
 
 /**
